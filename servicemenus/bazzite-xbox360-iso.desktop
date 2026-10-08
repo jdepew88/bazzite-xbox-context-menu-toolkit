@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Service
+MimeType=application/x-cd-image;application/x-iso9660-image;
+Actions=extractXbox360;
+X-KDE-Priority=TopLevel
+
+[Desktop Action extractXbox360]
+Name=Extract Xbox 360 ISO (for Xenia)
+Icon=folder-extract
+Exec=sh -c 'exec "$HOME/.local/lib/bazzite-xbox-context-menu-toolkit/bin/xbox-terminal-launch" xbox360 "$1"' dummy %f

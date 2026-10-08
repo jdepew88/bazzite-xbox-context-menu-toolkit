@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/xbox-common.sh"
+[[ $# -eq 1 ]] || fail 'Usage: extract-and-make-xbox-iso <archive.7z|.zip|.rar>'
+require_file "$1"
+archive="$(realpath -- "$1")"
+name="$(basename -- "$archive")"
+case "${name,,}" in *.7z|*.zip|*.rar) ;; *) fail 'Expected .7z, .zip, or .rar archive.';; esac
+base="${name%.*}"
+parent="$(dirname -- "$archive")"
+output="$parent/$base.iso"
+check_destination "$output"
+cli="$(find_xdvdfs)"
+seven="$(find_7zip)"
+make_stage "$parent"
+mkdir -- "$stage/extracted"
+info "Extracting archive: $archive"
+"$seven" x -y "-o$stage/extracted" "$archive"
+root="$(find_game_root "$stage/extracted")"
+info "Game root: $root"
+"$cli" pack "$root" "$stage/output.iso"
+[[ -s "$stage/output.iso" ]] || fail 'xDVDFS did not produce a nonempty ISO.'
+image_has_root_xbe "$cli" "$stage/output.iso" || fail 'Could not verify default.xbe at ISO root.'
+check_destination "$output"
+mv -n -- "$stage/output.iso" "$output"
+[[ -s "$output" ]] || fail 'Could not publish output ISO.'
+info "SUCCESS: $output"

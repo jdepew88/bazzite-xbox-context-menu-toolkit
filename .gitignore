@@ -1,0 +1,10 @@
+*.iso
+*.xiso
+*.7z
+*.rar
+*.zip
+*.xbe
+*.xex
+.xbox-toolkit-*/
+xdvdfs
+.DS_Store

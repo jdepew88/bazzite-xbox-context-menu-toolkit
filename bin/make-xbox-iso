@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/xbox-common.sh"
+[[ $# -eq 1 ]] || fail 'Usage: make-xbox-iso <game folder>'
+require_dir "$1"
+root="$(realpath -- "$1")"
+[[ "$root" != / ]] || fail 'Refusing filesystem root.'
+[[ -f "$root/default.xbe" ]] || fail 'Folder must contain default.xbe directly at its root.'
+cli="$(find_xdvdfs)"
+parent="$(dirname -- "$root")"
+name="$(basename -- "$root")"
+output="$parent/$name.iso"
+check_destination "$output"
+make_stage "$parent"
+tmpiso="$stage/$name.iso"
+info "Packing game folder: $root"
+"$cli" pack "$root" "$tmpiso"
+[[ -s "$tmpiso" ]] || fail 'xDVDFS did not produce a nonempty ISO.'
+image_has_root_xbe "$cli" "$tmpiso" || fail 'Could not verify default.xbe at ISO root.'
+check_destination "$output"
+mv -n -- "$tmpiso" "$output"
+[[ -s "$output" ]] || fail 'Could not publish output ISO.'
+info "SUCCESS: $output"

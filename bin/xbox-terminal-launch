@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+[[ $# -eq 2 ]] || { echo 'Expected: xbox-terminal-launch <action> <path>' >&2; exit 2; }
+action="$1"; input="$2"
+case "$action" in
+  folder) program="$HOME/.local/lib/bazzite-xbox-context-menu-toolkit/bin/make-xbox-iso";;
+  archive) program="$HOME/.local/lib/bazzite-xbox-context-menu-toolkit/bin/extract-and-make-xbox-iso";;
+  xbox360) program="$HOME/.local/lib/bazzite-xbox-context-menu-toolkit/bin/extract-xbox360-iso";;
+  *) echo 'Unknown action' >&2; exit 2;;
+esac
+[[ -x "$program" ]] || { echo "Missing executable: $program" >&2; exit 1; }
+# Terminal emulator receives the fixed launcher script plus positional arguments.
+if command -v konsole >/dev/null 2>&1; then
+  exec konsole --hold -e "$program" "$input"
+fi
+# Non-Dolphin/headless fallback prints output to stderr so failure is diagnosable.
+exec "$program" "$input"

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Service
+MimeType=inode/directory;
+Actions=makeXboxXiso;
+X-KDE-Priority=TopLevel
+
+[Desktop Action makeXboxXiso]
+Name=Create Original Xbox XISO (for xemu)
+Icon=media-optical
+Exec=sh -c 'exec "$HOME/.local/lib/bazzite-xbox-context-menu-toolkit/bin/xbox-terminal-launch" folder "$1"' dummy %f

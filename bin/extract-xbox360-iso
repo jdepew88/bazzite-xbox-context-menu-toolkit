@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/xbox-common.sh"
+[[ $# -eq 1 ]] || fail 'Usage: extract-xbox360-iso <disc.iso>'
+require_file "$1"
+iso="$(realpath -- "$1")"
+filename="$(basename -- "$iso")"
+case "${filename,,}" in *.iso) ;; *) fail 'Expected an .iso file.';; esac
+parent="$(dirname -- "$iso")"
+base="${filename%.*}"
+output="$parent/$base"
+check_destination "$output"
+cli="$(find_xdvdfs)"
+make_stage "$parent"
+mkdir -- "$stage/extracted"
+info "Extracting Xbox 360 image: $iso"
+"$cli" unpack "$iso" "$stage/extracted"
+[[ -s "$stage/extracted/default.xex" ]] || fail 'No nonempty default.xex at extracted folder root. Disc may be incompatible or an installer disc.'
+check_destination "$output"
+mv -n -- "$stage/extracted" "$output"
+[[ -s "$output/default.xex" ]] || fail 'Could not publish extracted game folder.'
+info "SUCCESS: $output"
